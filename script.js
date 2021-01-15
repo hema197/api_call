@@ -3,9 +3,54 @@ const search = document.querySelector('.imgrequired');
 const form = document.getElementById('myform');
 const error = document.querySelector('.error');
 const imageContainer = document.querySelector('.images');
+const matches = document.getElementById('match');
+const list = document.getElementById('list');
 let value;
 let valid;
 let url;
+
+const removeList = function () {
+  matches.classList.add('hidden');
+  list.innerHTML = '';
+};
+
+const matchSearch = function () {
+  let arr = [];
+  let res = fetch('./data.json').then(function (response) {
+    response.json().then(function (json) {
+      arr = json;
+      const presentValue = search.value;
+      if (presentValue.length < 3) removeList();
+      if (presentValue.length >= 3) {
+        const regex = new RegExp(`^${presentValue}`, 'gi');
+        matches.classList.remove('hidden');
+        error.classList.add('hidden');
+        imageContainer.innerHTML = '';
+        list.innerHTML = '';
+        let count = 0;
+        let i;
+        for (i = 0; i < arr.length; i++) {
+          if (arr[i].match(regex)) {
+            const match = `<li>${arr[i]}</li>`;
+            const position = 'beforeEnd';
+            list.insertAdjacentHTML(position, match);
+
+            count++;
+            if (count === 10) break;
+          }
+        }
+      }
+    });
+  });
+};
+
+search.addEventListener('input', matchSearch);
+matches.addEventListener('click', function (event) {
+  let element = event.target;
+  search.value = element.textContent;
+  removeList();
+});
+document.addEventListener('click', removeList);
 
 const setError = function (message) {
   error.classList.remove('hidden');
